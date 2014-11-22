@@ -2,7 +2,7 @@ from distutils.core import setup
  
 setup(
     name='influx-nagios-plugin',
-    version="1.0.0",
+    version="0.9.0",
     packages=['influx-nagios-plugin'],
     license='MIT',
     url="https://github.com/shaharke/nagios-influx-plugin.git",
