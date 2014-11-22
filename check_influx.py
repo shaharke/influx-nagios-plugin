@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+
+# The MIT License (MIT)
+#
+# Copyright (c) 2014 Shahar Kedar
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+from NagAconda import Plugin
+from influxdb import client as influxdb
+
+
+influx = Plugin("Plugin to retrieve data from influxdb", "1.0")
+influx.add_option("h", "host_port", "InfluxDB host and port", required=True)
+influx.add_option("u", "username", "User for authentication", required=True)
+influx.add_option("p", "password", "Password for authentication", required=True)
+influx.add_option("d", "database", "Host name to use in the URL", required=True)
+influx.add_option("q", "query", "Query to run against InfluxDB", required=True)
+influx.add_option("m", "metric", "Name of the metric")
+
+influx.enable_status("warning")
+influx.enable_status("critical")
+influx.start()
+
+host_and_port = influx.options.host_port.split(":")
+if len(host_and_port) == 1:
+    host = host_and_port[0]
+    port = 8086  # default influxdb port
+else:
+    host = host_and_port[0]
+    port = host_and_port[1]
+
+
+result = None
+query = influx.options.query
+metric = influx.options.metric or query
+
+try:
+    db = influxdb.InfluxDBClient(host, port, influx.options.username, influx.options.password, influx.options.database)
+    result = db.query(query)
+except Exception as e:
+    influx.unknown_error('Failed to query InfluxDB: %s' % e)
+
+if not result:
+    influx.unknown_error('InfluxDB returns empty result')
+
+if len(result) > 1 or len(result[0][u'points']) > 1:
+    influx.unknown_error('InfluxDB returns more than one result')
+
+try:
+    value = result[0][u'points'][0][1]
+except Exception as e:
+    influx.unknown_error('Failed extract value from query result')
+
+
+
+influx.set_value(metric, value)
+influx.set_status_message("value of %s: %f" % (metric, value))
+
+influx.finish()
