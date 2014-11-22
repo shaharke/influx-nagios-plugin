@@ -1,4 +1,4 @@
 nagios-influx-plugin
 ====================
 
-Nagios plugin that queries InfluxDB for monitoring stats
+Nagios plugin for querying stats from InfluxDB
