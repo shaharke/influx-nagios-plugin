@@ -2,7 +2,7 @@ from distutils.core import setup
  
 setup(
     name='influx-nagios-plugin',
-    version="0.9.0",
+    version="1.0.0",
     packages=['src'],
     install_requires=['influxdb', 'NagAconda'],
     license='MIT',
