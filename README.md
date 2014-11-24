@@ -3,6 +3,12 @@ nagios-influx-plugin
 
 Nagios plugin for querying stats from InfluxDB
 
+**Installation:**
+
+```shell
+pip install influx-nagios-plugin
+```
+
 **Usage:**
 
 ```shell
