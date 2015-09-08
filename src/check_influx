@@ -50,7 +50,6 @@ else:
 
 result = None
 query = influx.options.query
-metric = influx.options.metric or query
 
 try:
     db = influxdb.InfluxDBClient(host, port, influx.options.username, influx.options.password, influx.options.database)
@@ -61,15 +60,32 @@ except Exception as e:
 if not result:
     influx.unknown_error('InfluxDB returns empty result')
 
-if len(result) > 1 or len(result[0][u'points']) > 1:
+series = result.keys()
+if len(series) > 1:
     influx.unknown_error('InfluxDB returns more than one result')
 
+measurement, tags = series[0]
+points = result.get_points(measurement=measurement, tags=tags)
+points = list(points)
+if len(points) > 1:
+    influx.unknown_error('InfluxDB returns more than one point')
+
+point = points[0]
+if len(point) > 2:
+    influx.unknown_error('InfluxDB returns more than one column')
+
+keys = point.keys()
+for key in keys:
+    if key.lower() == 'time':
+        continue
+    value = point[key]
+
 try:
-    value = result[0][u'points'][0][1]
-except Exception as e:
+    value
+except NameError:
     influx.unknown_error('Failed extract value from query result')
 
-
+metric = influx.options.metric or measurement
 
 influx.set_value(metric, value)
 influx.set_status_message("value of %s: %f" % (metric, value))
