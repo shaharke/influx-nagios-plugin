@@ -1,2 +1,2 @@
-influxdb
+influxdb>2.5.0
 NagAconda
