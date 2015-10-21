@@ -17,7 +17,7 @@ check_influx -h HOST_PORT -u USERNAME -p PASSWORD -d DATABASE -q QUERY [-m METRI
 
 **Options**:
 
-**-h** Colon separated host and port of InfluxDB (e.g. localhost:8083). Port is optional (8083 by default)<br>
+**-h** Colon separated host and port of InfluxDB (e.g. localhost:8086). Port is optional (8086 by default)<br>
 **-u** InfluxDB username<br>
 **-p** InfluxDB password<br>
 **-d** InfluxDB database name<br>
